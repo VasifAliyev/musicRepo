@@ -3,7 +3,7 @@ const artist = document.querySelector('#artist') //selector
 const music = document.querySelector('audio') // tag
 
 // duration elementler
-const currentTimeEl = document.getElementById('current=time')
+const currentTimeEl = document.getElementById('current-time')
 const durationEl = document.getElementById('duration')
 const progressContainer = document.getElementById('progress-container')
 const progress = document.getElementById('progress')
@@ -46,7 +46,8 @@ const songs = [
         isPlaying = true
         playBtn.classList.replace('fa-play', 'fa-pause')
         playBtn.setAttribute('title', 'Pause')
-        music.play() //bizim yaratdigimiz deil, audio kitabxanasinin verdiyi imkandir
+        music.play() 
+        //bizim yaratdigimiz deil, audio kitabxanasinin verdiyi imkandir
 
     }
 
@@ -64,5 +65,70 @@ const songs = [
     */
     playBtn.addEventListener('click',()=>(isPlaying?pauseSong() : playSong()))
 
+    // parametrli funksiyalar
+    /* function total(a=0, b=0){
+        return a + b
+    }*/
+    function loadSong(song){
+        title.textContent = song.displayName
+        artist.textContent = song.artist
+        music.src =`../music/${song.name}.mp3` 
+    }
+    // initial value = 0
+    let songIndex = 0
 
+    function prevSong(){
+        // decrement --
+        // songIndex = songIndex - 1
+        songIndex --
+        if(songIndex < 0){
+            songIndex = songs.length - 1
+        }
+        loadSong(songs[songIndex])
+        playSong()
+    }
 
+    function nextSong(){
+        songIndex ++
+        if(songIndex>songs.length-1){
+            songIndex = 0
+        }
+        loadSong(songs[songIndex])
+      
+    }
+    loadSong(songs[songIndex])
+
+    // Update progress
+    function updateProgressBar(e) {  // e - event
+        if(isPlaying) {
+            // object destructuring
+            const {duration, currentTime} = e.srcElement
+            const progressPercent = (currentTime/duration)*100
+            progress.style.width = `${progressPercent}%`
+
+            // calculate for duration
+            const durationMinutes = Math.floor(duration/60)
+            let durationSeconds = Math.floor(duration%60)
+
+            if(durationSeconds<10){
+                durationSeconds = `0${durationSeconds}`
+            }
+            if(durationSeconds){
+                durationEl.textContent = `${durationMinutes}:${durationSeconds}`
+            }
+            // calculate for current time
+            const currentMinutes = Math.floor(currentTime/60)
+            let currentSeconds = Math.floor(currentTime%60)
+
+            if(currentSeconds < 10){
+                currentSeconds = `0${currentSeconds}`
+
+            }
+            currentTimeEl.textContent = `${currentMinutes}:${currentSeconds}`
+        }
+    }   
+
+    // eventListener
+    prevBtn.addEventListener(`click`, prevSong)
+    nextBtn.addEventListener('click', nextSong)
+    music.addEventListener('timeupdate', updateProgressBar)
